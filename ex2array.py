@@ -57,7 +57,7 @@ def imagetoshow2DMulit(img,img2):
         plt.imshow(img2)
     plt.show()
 
-def remove(img_input,NUM,mask_ON=False,mask_input=None):
+def removeRECUSIV(img_input,NUM,mask_ON=False,mask_input=None):
     if (len(img_input.shape) != 3):
         print("Gray INPUT")
         img_input = np.expand_dims(img_input, axis=2)
@@ -76,8 +76,32 @@ def remove(img_input,NUM,mask_ON=False,mask_input=None):
         mask_input=mask_input[mask[:,:,0]].reshape((row,col-1))
     if NUM>0:
         NUM-=1
-        pic=remove(pic,NUM,mask_ON,mask_input)
+        pic=removeRECUSIV(pic,NUM,mask_ON,mask_input)
     return pic
+def removenew(img_input,NUM,STEP,mask_ON=False,mask_input=None):
+    if (len(img_input.shape) != 3):
+        print("Gray INPUT")
+        img_input = np.expand_dims(img_input, axis=2)
+
+    while NUM>0:
+        if NUM % STEP == 0:
+            img_COST = ComputerEnergy(img_input)
+        if mask_ON:
+            img_COST += mask_input
+        index_list = seam_carving(img_COST)
+
+        row, col, channel = img_input.shape
+        mask = np.empty_like(img_input).astype(bool)
+        mask.fill(True)
+        for x, y in enumerate(index_list):
+            mask[x, y, :] = False
+        img_input = img_input[mask].reshape((row, col - 1, channel))
+
+        if mask_ON:
+            mask_input = mask_input[mask[:, :, 0]].reshape((row, col - 1))
+        img_COST = img_COST[mask[:, :, 0]].reshape((row, col - 1))
+        NUM-=1
+    return img_input
 img_v=cv2.imread('data/kingfishers.jpg')
 img_v=cv2.cvtColor(img_v,cv2.COLOR_BGR2RGB)
 
@@ -91,5 +115,5 @@ img_g=cv2.cvtColor(imgc,cv2.COLOR_RGB2GRAY)
 
 indexlist=seam_carving(img_v)
 
-imgtest=remove(imgc,450,True,img_mask)
+imgtest=removenew(imgc,450,10,True,img_mask)
 imagetoshow2DMulit(imgc,imgtest)
