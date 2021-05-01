@@ -82,6 +82,7 @@ def removenew(img_input,NUM,STEP,mask_ON=False,mask_input=None):
     if (len(img_input.shape) != 3):
         print("Gray INPUT")
         img_input = np.expand_dims(img_input, axis=2)
+    img_COST = ComputerEnergy(img_input)
 
     while NUM>0:
         if NUM % STEP == 0:
@@ -102,8 +103,55 @@ def removenew(img_input,NUM,STEP,mask_ON=False,mask_input=None):
         img_COST = img_COST[mask[:, :, 0]].reshape((row, col - 1))
         NUM-=1
     return img_input
-img_v=cv2.imread('data/kingfishers.jpg')
-img_v=cv2.cvtColor(img_v,cv2.COLOR_BGR2RGB)
+
+def extand(img_input,NUM,STEP,mask_ON=False,mask_input=None):
+    if (len(img_input.shape) != 3):
+        print("Gray INPUT")
+        img_input = np.expand_dims(img_input, axis=2)
+    img_COST = ComputerEnergy(img_input)
+    while NUM > 0:
+        if NUM % STEP == 0:
+            img_COST = ComputerEnergy(img_input)
+        if mask_ON:
+            img_COST += mask_input
+        row, col, channel = img_input.shape
+        index_list = seam_carving(img_COST)
+        # index_list_right=[i+1 for i in index_list ]
+        # index_list_right=[i if i<col else col for i in index_list_right]
+        #
+        mask = np.empty_like(img_input).astype(bool)
+        mask.fill(False)
+        mask2=mask.copy()
+        # for x, y in enumerate(index_list):
+        #     mask[x, y, :] = True
+        # img_insert_part = img_input[mask]
+
+        # for x1, y1 in enumerate(index_list_right):
+        #     mask2[x1, y1, :] = True
+        # img_insert_part2 = img_input[mask2]
+        # img_insert=((img_insert_part+img_insert_part2)//2).reshape((row, 1, channel))
+        temp= np.zeros([row, col+1, channel]).astype(np.int)
+        for x, y in enumerate(index_list):
+            temp[x,0:y,:]=img_input[x,0:y,:]
+
+            if y+1>col:
+                grenz=col
+            else:
+                grenz = y + 1
+            temp[x,y,:]=(img_input[x,y,:]+img_input[x,grenz,:])//2
+            temp[x,y+1:col+1,:]=img_input[x,y:col+1,:]
+        img_input=temp
+        if mask_ON:
+            mask_input = mask_input[mask[:, :, 0]].reshape((row, col - 1))
+        # img_COST = img_COST[mask[:, :, 0]].reshape((row, col - 1))
+        NUM-=1
+
+    return img_input
+
+
+img_v=cv2.imread('data/vincent-on-cliff.jpg')
+img_v=cv2.cvtColor(img_v,cv2.COLOR_BGR2RGB).astype(np.uint16)
+img_gg=cv2.cvtColor(img_v,cv2.COLOR_BGR2GRAY)
 
 img_mask=cv2.imread('data/kingfishers-mask.png')
 img_mask=cv2.cvtColor(img_mask,cv2.COLOR_BGR2GRAY)
@@ -112,8 +160,7 @@ imgc=img_v.copy()
 
 # Cost_R, Cost_C=Cost(img_v)
 img_g=cv2.cvtColor(imgc,cv2.COLOR_RGB2GRAY)
-
-indexlist=seam_carving(img_v)
-
-imgtest=removenew(imgc,450,10,True,img_mask)
+imgtest=extand(img_v,100,10)
+print(imgtest.shape)
+# imgtest=removenew(imgc,450,10,True,img_mask)
 imagetoshow2DMulit(imgc,imgtest)
