@@ -82,7 +82,7 @@ def Removebetter(img_input,REDUCE_NUM=0,Mask_On=True,mask_input=None,Row_Switch_
     for i in tqdm(range(REDUCE_NUM)):
         img_copy = img_input.copy()
 
-        temp = ComputerEnergy(img_copy)
+        temp = ComputerEnergy(img_copy.copy())
         if Mask_On:
 
             temp = temp + mask
@@ -143,8 +143,7 @@ def imagetoshow2D(img):
 img=cv2.imread('data/common-kestrel.jpg')
 img_gray=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
-# REDUCE_NUM=1000
-# result=Remove(img,REDUCE_NUM)
+
 img_bird=cv2.imread('data/kingfishers.jpg')
 img_bird_mask=cv2.imread('data/kingfishers-mask.png')
 img_bird_mask=cv2.cvtColor(img_bird_mask,cv2.COLOR_BGR2GRAY)

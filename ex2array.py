@@ -3,6 +3,8 @@ from scipy.ndimage import minimum_filter1d
 import cv2
 from scipy.signal import convolve
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
 # arr = np.array([[4,3,2,1,3,5,4],[2,5,4,3,5,1,3],[4,1,3,2,4,4,2],[1,5,3,2,5,1,1],[4,2,1,3,2,2,4],[5,2,5,5,2,4,1],[3,5,1,4,1,2,5]])
 def seam_carving(arr):
     for i in range(arr.shape[0]-1):
@@ -102,7 +104,7 @@ def removenew(img_input,NUM,STEP,mask_ON=False,mask_input=None):
         print("Gray INPUT")
         img_input = np.expand_dims(img_input, axis=2)
     img_COST = ComputerEnergy(img_input.copy())
-    while NUM>0:
+    for _ in tqdm(range(NUM)):
         if NUM % STEP == 0:
             img_COST = ComputerEnergy(img_input.copy())
         if mask_ON:
@@ -118,7 +120,6 @@ def removenew(img_input,NUM,STEP,mask_ON=False,mask_input=None):
         if mask_ON:
             mask_input = mask_input[mask[:, :, 0]].reshape((row, col - 1))
         img_COST = img_COST[mask[:, :, 0]].reshape((row, col - 1))
-        NUM-=1
     return img_input
 
 def extand(img_input,NUM,STEP,mask_ON=False,mask_input=None):
@@ -186,9 +187,16 @@ imgcopy=img_vincent.copy()
 img_mask_vincent=np.zeros_like(img_vincent)
 img_mask_vincent[300:860,1100:1400,:]=2550
 img_mask_vincent=cv2.cvtColor(img_mask_vincent,cv2.COLOR_BGR2GRAY)
+
 # img_g=cv2.cvtColor(imgc,cv2.COLOR_RGB2GRAY)
-# imgtest=removenew(img_bird,400,10,True,img_bird_mask)
-imgtest=extand(img_vincent,1400,10,True,img_mask_vincent)
+#TODO Exercise 4.4: seam carving on images
+
+imgtest_remove=removenew(img_bird,100,10,True,img_bird_mask)
+imagetoshow2DMulit(imgtest_remove,img_bird)
+
+#TODO Exercise 5: upscaling images
+
+imgtest=extand(img_vincent,200,10,True,img_mask_vincent)
 print(imgtest.shape)
 # imgtest=removenew(imgc,450,10,True,img_mask)
 imagetoshow2DMulit(img_vincent,imgtest)

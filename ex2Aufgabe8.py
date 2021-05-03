@@ -98,7 +98,7 @@ def lineStart(img_input,rate=0.25):
     return result
 
 
-img_v2=cv2.imread(r'data/e-codices_acv-P-Antitus_027v_large.jpg')
+img_v2=cv2.imread(r'data/e-codices_kba-0016-2_006v_large.jpg')
 img_v2=cv2.cvtColor(img_v2,cv2.COLOR_BGR2RGB).astype(np.uint16)
 gray2=cv2.cvtColor(img_v2,cv2.COLOR_BGR2GRAY)
 img_mean = np.mean(gray2)
@@ -112,7 +112,7 @@ projection = np.sum(img_contrast,axis=1)
 
 subImg = img_contrast[:,:int(img_contrast.shape[1]*0.25)]
 temp = np.sum(subImg,axis=1)
-cost = median(temp, size=30)
+cost = median(temp, size=5)
 cost[cost>0]=0
 x = abs(cost)
 peaks, _ = find_peaks(x, height=0)
